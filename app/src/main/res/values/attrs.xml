@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ThermometerView">
+        <attr name="viewBg" format="color|reference" />
+        <attr name="unitTextSize" format="dimension" />
+        <attr name="unitTextColor" format="color|reference" />
+        <attr name="scaleTextSize" format="dimension" />
+        <attr name="scaleTextColor" format="color|reference" />
+        <attr name="maxScaleLineColor" format="color|reference" />
+        <attr name="midScaleLineColor" format="color|reference" />
+        <attr name="minScaleLineColor" format="color|reference" />
+        <attr name="scaleLineWidth" format="float" />
+        <attr name="maxLineWidth" format="float" />
+        <attr name="midLineWidth" format="float" />
+        <attr name="minLineWidth" format="float" />
+        <attr name="spaceScaleWidth" format="float" />
+        <attr name="thermometerBg" format="color|reference" />
+        <attr name="thermometerShadowBg" format="color|reference" />
+        <attr name="maxThermometerRadius" format="float" />
+        <attr name="minThermometerRadius" format="float" />
+        <attr name="maxMercuryRadius" format="float" />
+        <attr name="minMercuryRadius" format="float" />
+        <attr name="leftMercuryBg" format="color|reference" />
+        <attr name="rightMercuryBg" format="color|reference" />
+        <attr name="leftMercuryColor" format="color|reference" />
+        <attr name="rightMercuryColor" format="color|reference" />
+        <attr name="maxScaleValue" format="float" />
+        <attr name="minScaleValue" format="float" />
+        <attr name="curScaleValue" format="float" />
+    </declare-styleable>
+
+</resources>
