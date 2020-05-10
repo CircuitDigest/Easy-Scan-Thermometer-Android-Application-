@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "246897406568",
+    "firebase_url": "https://easyscan-ab54e.firebaseio.com",
+    "project_id": "easyscan-ab54e",
+    "storage_bucket": "easyscan-ab54e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:246897406568:android:45218f5a798bba79ea41dd",
+        "android_client_info": {
+          "package_name": "com.circuitloop.easyscan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "246897406568-iqpcu4no4d032npmmtcvqkn6buopaada.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfbuiVPFjBlNUA3emER_Ak-OUbdY0V9s0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "246897406568-iqpcu4no4d032npmmtcvqkn6buopaada.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -126,7 +126,7 @@ class SerialService : Service(),
             PendingIntent.getActivity(this, 1, restartIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val builder =
             NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.ic_notification)
+                .setSmallIcon(R.drawable.app_logo)
                 .setColor(resources.getColor(R.color.colorPrimary))
                 .setContentTitle(resources.getString(R.string.app_name))
                 .setContentText(notificationMsg)

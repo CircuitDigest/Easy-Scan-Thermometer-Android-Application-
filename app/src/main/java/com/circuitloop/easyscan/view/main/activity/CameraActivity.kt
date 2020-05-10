@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Matrix
 import android.os.Bundle
+import android.os.Environment
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Rational
@@ -41,16 +42,14 @@ import kotlin.math.min
 private const val REQUEST_CODE_PERMISSIONS = 10
 
 // This is an array of all the permission specified in the manifest
-private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
 
 class CameraActivity : AppCompatActivity(), LifecycleOwner {
-    var mHomeBaseModelPos: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
-        mHomeBaseModelPos = intent.getIntExtra(INTENT_KEY_HOMEBASEMODEL, -1)
         viewFinder = findViewById(R.id.view_finder)
 
         // Request camera permissions
@@ -136,8 +135,12 @@ class CameraActivity : AppCompatActivity(), LifecycleOwner {
         // Build the image capture use case and attach button click listener
         val imageCapture = ImageCapture(imageCaptureConfig)
         findViewById<ImageButton>(R.id.capture_button).setOnClickListener {
+            var parent = File(Environment.getExternalStorageDirectory().path,"/EasyScan")
+            if(!parent.isDirectory){
+                parent.mkdir()
+            }
             val file = File(
-                externalMediaDirs.first(),
+                parent,
                 "${System.currentTimeMillis()}.jpg"
             )
             imageCapture.takePicture(file,
@@ -156,7 +159,6 @@ class CameraActivity : AppCompatActivity(), LifecycleOwner {
                         Log.d("CameraXApp", msg)
                         val intent = Intent()
                         intent.putExtra(RESULT_INTENT, file.absolutePath)
-                        intent.putExtra(INTENT_KEY_HOMEBASEMODEL, mHomeBaseModelPos)
                         intent.putExtra(INTENT_KEY_VIEWFINDERWIDTH, viewFinder.width)
                         intent.putExtra(INTENT_KEY_VIEWFINDERHEIGHT, viewFinder.height)
                         setResult(Activity.RESULT_OK, intent)

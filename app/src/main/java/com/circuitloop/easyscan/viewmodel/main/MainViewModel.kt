@@ -11,7 +11,7 @@ class MainViewModel(var movieTableDao: DetailsTableDao) : ViewModel() {
 
     var detailsList: MutableLiveData<List<DetailsTable>> = MutableLiveData()
     var suspectedList: MutableLiveData<List<DetailsTable>> = MutableLiveData()
-    var detailsListPresent: MutableLiveData<Boolean> = MutableLiveData()
+    var detailsListPresent: MutableLiveData<Int> = MutableLiveData()
     var isAdded: MutableLiveData<Int> = MutableLiveData()
     var isCleared: MutableLiveData<Int> = MutableLiveData()
 
@@ -22,7 +22,7 @@ class MainViewModel(var movieTableDao: DetailsTableDao) : ViewModel() {
                 if (it != null && it?.size > 0) {
                     detailsList.postValue(it)
                 } else {
-                    detailsListPresent.postValue(false)
+                    detailsListPresent.postValue(-1)
                 }
             }
     }
@@ -34,7 +34,7 @@ class MainViewModel(var movieTableDao: DetailsTableDao) : ViewModel() {
                 if (it != null && it?.size > 0) {
                     suspectedList.postValue(it)
                 } else {
-                    detailsListPresent.postValue(false)
+                    detailsListPresent.postValue(-1)
                 }
             }
     }

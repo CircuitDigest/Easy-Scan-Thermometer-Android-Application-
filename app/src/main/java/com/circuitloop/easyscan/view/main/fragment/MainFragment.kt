@@ -4,17 +4,23 @@ import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
-import android.view.*
+import android.os.Handler
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.circuitloop.easyscan.R
 import com.circuitloop.easyscan.databinding.FragmentMainBinding
 import com.circuitloop.easyscan.utils.CustomProber
+import com.circuitloop.easyscan.viewmodel.main.MainViewModel
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import kotlinx.android.synthetic.main.fragment_main.*
+import org.koin.android.viewmodel.ext.android.viewModel
 import kotlin.collections.ArrayList
+
 
 class MainFragment : Fragment() {
 
@@ -43,9 +49,15 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-            Glide.with(this)
-                .load(R.drawable.edited_otg)
-                .into(img_view);
+        Glide.with(this)
+            .load(R.drawable.otg_connect)
+            .into(img_view);
+//        Handler().postDelayed(
+//            {
+//                fragmentManager?.beginTransaction()?.replace(R.id.fragment, DetailsFragment.newInstance(), "Details")
+//                    ?.addToBackStack("Details")?.commit()
+//            },1000
+//        )
     }
 
     override fun onResume() {
@@ -67,6 +79,7 @@ class MainFragment : Fragment() {
             if (driver != null) {
                 val args = Bundle()
                 args.putInt("device", device.deviceId)
+                args.putString("devicename", device.deviceName)
                 args.putInt("port", driver.ports.indices.first)
                 args.putInt("baud", baudRate)
                 val fragment: Fragment =
@@ -87,5 +100,6 @@ class MainFragment : Fragment() {
     }
 
     internal class ListItem(var device: UsbDevice, var port: Int, var driver: UsbSerialDriver?)
+    val mViewModel: MainViewModel by viewModel()
 
 }

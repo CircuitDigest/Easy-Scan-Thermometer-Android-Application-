@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#222539</color>
     <color name="colorPrimaryDark">#222539</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorAccent">#79c9bc</color>
 
     <color name="colorRecieveText">#00FF00</color>
     <color name="colorSendText">#82CAFF</color>
@@ -11,5 +11,4 @@
     <color name="colorRedBg">#FD8B83</color>
 
 
-    82CAFF
 </resources>

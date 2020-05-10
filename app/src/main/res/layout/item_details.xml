@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="obj"
+            type="com.circuitloop.easyscan.database.DetailsTable" />
+
+        <variable
+            name="list"
+            type="java.util.List&lt;com.circuitloop.easyscan.database.DetailsTable&gt;"/>
+
+        <variable
+            name="pos"
+            type="Integer" />
+
+        <variable
+            name="handler"
+            type="com.circuitloop.easyscan.utils.ApplicationHandler" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F5F5F5"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/date_txt"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintBottom_toTopOf="@id/fav_item"
+            android:layout_marginRight="10dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:textColor="#878383"
+            android:text="@{obj.lastDate}"
+            app:list="@{list}"
+            app:pos="@{pos}"
+            tools:text="Date : 08/05/20"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:layout_height="wrap_content"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fav_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/date_txt"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:background="@drawable/item_bg"
+            android:padding="10dp">
+
+            <!--        android:background="@{obj.suspected ? @color/colorGreenBg : @color/colorGreenBg}"-->
+
+
+            <TextView
+                android:id="@+id/txt_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginLeft="16dp"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                android:text="@{obj.serialNo.toString()!=null ? obj.serialNo.toString() : ' '}"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#878383"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="0.46"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/txt_time"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="111" />
+
+            <TextView
+                android:id="@+id/txt_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="2dp"
+                android:text="@{obj.time.toString()!=null ? obj.time.toString() : ' '}"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#878383"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/txt_id"
+                app:layout_constraintRight_toLeftOf="@id/txt_temp"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="9.53pm" />
+
+
+            <TextView
+                android:id="@+id/txt_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_bg"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:padding="10dp"
+                android:textColor="@{obj.suspected ? @color/colorRedBg : @color/colorGreenBg}"
+                android:text="@{obj.temperature.toString()!=null ? obj.temperature.toString() : ' '}"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginRight="4dp"
+                app:layout_constraintLeft_toRightOf="@id/txt_time"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="38.0c" />
+
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -16,14 +16,19 @@ import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.circuitloop.easyscan.R
+import com.circuitloop.easyscan.app.MainApplication
 import com.circuitloop.easyscan.database.DetailsTable
 import com.circuitloop.easyscan.services.SerialService
 import com.circuitloop.easyscan.utils.Constants
@@ -34,16 +39,19 @@ import com.circuitloop.easyscan.utils.Constants.INTENT_KEY_VIEWFINDERWIDTH
 import com.circuitloop.easyscan.utils.Constants.RESULT_INTENT
 import com.circuitloop.easyscan.utils.CustomProber
 import com.circuitloop.easyscan.utils.SerialSocket
+import com.circuitloop.easyscan.utils.SharedPreferencesHolder
 import com.circuitloop.easyscan.view.main.activity.CameraActivity
+import com.circuitloop.easyscan.view.main.activity.MainActivity
 import com.circuitloop.easyscan.view.main.listener.SerialListener
 import com.circuitloop.easyscan.viewmodel.main.MainViewModel
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
-import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_terminal.*
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.io.File
 import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
 
 class TerminalFragment : Fragment(),
@@ -52,7 +60,12 @@ class TerminalFragment : Fragment(),
         False, Pending, True
     }
 
+    private var isSoundEnabled: Boolean = true
+
+    private var mData: String = ""
+    private var deviceName: String? = ""
     private var isSuspected: Boolean = false
+    private var isDelayed: Boolean = false
     private var deviceId = 0
     private var portNum = 0
     private val baudRate = 9600
@@ -74,8 +87,12 @@ class TerminalFragment : Fragment(),
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         retainInstance = true
-        deviceId = arguments!!.getInt("device")
-        portNum = arguments!!.getInt("port")
+        getActivity()?.getWindow()?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        arguments?.let {
+            deviceId = it.getInt("device")
+            portNum = it.getInt("port")
+            deviceName = it.getString("devicename")
+        }
     }
 
     override fun onDestroy() {
@@ -162,6 +179,7 @@ class TerminalFragment : Fragment(),
        // receive_text?.setMovementMethod(ScrollingMovementMethod.getInstance())
         val sendText = view.findViewById<TextView>(R.id.send_text)
         val sendBtn = view.findViewById<View>(R.id.send_btn)
+        val deviceIdTxt = view.findViewById<TextView>(R.id.device_id)
         sendBtn.setOnClickListener { v: View? ->
             send(
                 sendText.text.toString()
@@ -172,8 +190,9 @@ class TerminalFragment : Fragment(),
         mViewModel.getSuspectedList()
 
         mViewModel.detailsListPresent.observe(viewLifecycleOwner, Observer {
-            if (!it) {
-                Toast.makeText(context,"No data",Toast.LENGTH_LONG).show()
+            if (it==-1) {
+                suspected_count.text = "0"
+                total_count.text = "0"
             }
         })
 
@@ -273,20 +292,37 @@ class TerminalFragment : Fragment(),
         }
     }
 
+    private fun checkSettings(): Boolean {
+        SharedPreferencesHolder.initializeSharedPrefs(context!!)
+        return SharedPreferencesHolder.appSharedPreferences.getBoolean(Constants.SHARED_PREF_KEY_SETTING_DATA, true)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        Glide.with(this)
-//            .load(R.drawable.edited_otg)
-//            .into(imgview_forehead);
+        Glide.with(this)
+            .load(R.drawable.thermometer_place)
+            .into(imgview_forehead)
+        showForeheadImg(true)
+        isSoundEnabled = checkSettings()
+        camera_btn.visibility = View.GONE
+        cancel_btn.visibility = View.GONE
+        total_lyt?.setOnClickListener{
+            showDetails(false)
+        }
+        suspected_lyt?.setOnClickListener{
+            showDetails(true)
+        }
         mViewModel.detailsList.observe(viewLifecycleOwner , Observer {
-            total_count.text = "No of Persons Scanned : " + it.size
+            total_count.text = it.size.toString()
         })
         mViewModel.suspectedList.observe(viewLifecycleOwner , Observer {
-            suspected_count.text = "Suspected Cases : " + it.size
+            suspected_count.text = it.size.toString()
         })
         mViewModel.isCleared.observe(viewLifecycleOwner , Observer {
             if(it==1){
                 Toast.makeText(context, "Session Cleared Successfully", Toast.LENGTH_LONG).show()
+                suspected_count.text = "0"
+                total_count.text = "0"
             }
         })
         reset_txt?.setOnClickListener {
@@ -294,24 +330,47 @@ class TerminalFragment : Fragment(),
         }
     }
 
+    private fun logAnalyticsEvent(total: String, suspected: String) {
+        val bundle = Bundle()
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, total)
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, suspected)
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
+        MainApplication.mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle)
+    }
+
+    private fun showDetails(b: Boolean) {
+        val args = Bundle()
+        args.putBoolean("isSuspected", b)
+        val fragment: Fragment =
+            DetailsFragment()
+        fragment.arguments = args
+        fragmentManager!!.beginTransaction().replace(R.id.fragment, fragment, "Details")
+            .addToBackStack("Details").commit()
+    }
+
+
     private fun receive(data: ByteArray) {
-            if(String(data).trim().equals("position_error")){
-                showForeheadImg(true)
-                camera_btn.visibility = View.GONE
-                temp_bg?.setBackgroundColor(resources.getColor(R.color.colorSendText))
-                mDataCounter = 0
+            if(String(data).trim().equals("position_error") && !isSuspected ){
+                    showForeheadImg(true)
+                    camera_btn?.visibility = View.GONE
+                    cancel_btn?.visibility = View.GONE
+                    temp_bg?.setBackgroundResource(R.drawable.temperature_bg)
+                    mDataCounter = 0
+
             }else{
                 if(mDataCounter < 3) {
                     mDataCounter += 1
                     var tempValue = 0f
                     try {
                         tempValue = String(data).toFloat()
-                        receive_text.text = String(data).trim() + "°C"
+                        receive_text.text = String(data).trim()
                         showForeheadImg(false)
                         if (mDataCounter > 2) {
+                            mData = String(data)
                             isSuspected = checkTempForCamera(tempValue)
-                            saveData(String(data))
-                            playSound()
+                            if(!isSuspected)saveData(String(data), "")
+                            playSound(isSuspected)
+                            Thread.sleep(1500);
                         }
                     } catch (e: java.lang.Exception) {
 
@@ -321,25 +380,42 @@ class TerminalFragment : Fragment(),
 
     }
 
-    private fun saveData(tempValue: String) {
+    private fun saveData(tempValue: String, info: String) {
         var tableItem = DetailsTable()
         tableItem.temperature = tempValue
-        tableItem.time = Calendar.getInstance().getTime().toString()
         tableItem.isSuspected = isSuspected
+        tableItem.date = Calendar.getInstance().timeInMillis
+
+        val pattern = "hh:mm a"
+        val simpleDateFormat = SimpleDateFormat(pattern)
+        val time: String = simpleDateFormat.format(Calendar.getInstance().getTime())
+        tableItem.time = time
+
+        val pattern1 = "dd/MM/yy"
+        val simpleDateFormat1 = SimpleDateFormat(pattern1)
+        val time1: String = simpleDateFormat1.format(Calendar.getInstance().getTime())
+        tableItem.lastDate = time1
+        tableItem.imgPath = info
         mViewModel.saveToBookmark(tableItem)
     }
 
     private fun checkTempForCamera(tempValue: Float): Boolean {
         if(tempValue > 38f){
-            temp_bg?.setBackgroundColor(resources.getColor(R.color.colorRedBg))
+            temp_bg?.setBackgroundResource(R.drawable.temp_red_bg)
             camera_btn.visibility = View.VISIBLE
+            cancel_btn.visibility = View.VISIBLE
             camera_btn.setOnClickListener {
                 launchCamera()
+            }
+            cancel_btn.setOnClickListener {
+                saveData(mData,"")
+                isSuspected = false
             }
             return true
         }else{
             camera_btn.visibility = View.GONE
-            temp_bg?.setBackgroundColor(resources.getColor(R.color.colorGreenBg))
+            cancel_btn.visibility = View.GONE
+            temp_bg?.setBackgroundResource(R.drawable.temp_green_bg)
             return false
         }
     }
@@ -349,25 +425,29 @@ class TerminalFragment : Fragment(),
         startActivityForResult(intent, CAMERA_INTENT)
     }
 
-    private fun playSound() {
+    private fun playSound(suspected: Boolean?) {
         var mp1 : MediaPlayer? = null
-        mp1 = MediaPlayer.create(context, R.raw.censored_beep)
-        mp1.setOnCompletionListener(object : MediaPlayer.OnCompletionListener {
+        suspected?.let {
+            if(suspected) mp1 = MediaPlayer.create(context, R.raw.suspected)
+            else mp1 = MediaPlayer.create(context, R.raw.normal)
+        }
+        if(suspected==null) mp1 = MediaPlayer.create(context, R.raw.scan)
+        mp1?.setOnCompletionListener(object : MediaPlayer.OnCompletionListener {
             @Override
             override fun onCompletion(mp: MediaPlayer?) {
-                mp?.reset();
-                mp?.release();
-                mp1 = null;
+                mp?.reset()
+                mp?.release()
+                mp1 = null
             }
         });
-        mp1?.start();
+        if(isSoundEnabled) mp1?.start()
     }
 
     private fun showForeheadImg(b: Boolean) {
         if(b){
-            forehead_lyt.visibility = View.VISIBLE
+            forehead_lyt?.visibility = View.VISIBLE
         }else{
-            forehead_lyt.visibility = View.GONE
+            forehead_lyt?.visibility = View.GONE
         }
     }
 
@@ -381,7 +461,7 @@ class TerminalFragment : Fragment(),
         )
         //receive_text?.append(spn)
         if(str.contains("connection lost")||str.contains("connection failed")){
-            activity?.onBackPressed()
+            (activity as MainActivity).onTerminalBackPressed()
         }
     }
 
@@ -408,8 +488,6 @@ class TerminalFragment : Fragment(),
         status("connection lost: " + e?.message)
         disconnect()
     }
-
-
 
     internal inner class ControlLines(view: View) {
         private val mainLooper: Handler
@@ -517,47 +595,60 @@ class TerminalFragment : Fragment(),
         private const val refreshInterval = 200 // msec
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             CAMERA_INTENT -> {
                 if (resultCode == Activity.RESULT_OK) {
                     val info = data?.extras?.getString(RESULT_INTENT)
-                    val objPos = data?.extras?.getInt(INTENT_KEY_HOMEBASEMODEL)
                     val width = data?.extras?.getInt(INTENT_KEY_VIEWFINDERWIDTH)
                     val height = data?.extras?.getInt(INTENT_KEY_VIEWFINDERHEIGHT)
                     val imgFile = File(info as String)
                     if (imgFile.exists()) {
-                        val bitmapFile = BitmapFactory.decodeFile(imgFile.getAbsolutePath())
-                        val matrix = Matrix()
-                        matrix.postRotate(90f)
-                        val previewBitmap =
-                            Bitmap.createScaledBitmap(bitmapFile, bitmapFile.height, bitmapFile.width, true)
-                        val scaledBitmap = Bitmap.createScaledBitmap(bitmapFile, height!!, width!!, true)
-                        val rotatedScaledBitmap = Bitmap.createBitmap(
-                            scaledBitmap,
-                            0,
-                            0,
-                            scaledBitmap.width,
-                            scaledBitmap.height,
-                            matrix,
-                            true
-                        )
-                        val rotatedBitmap = Bitmap.createBitmap(
-                            previewBitmap,
-                            0,
-                            0,
-                            previewBitmap.width,
-                            previewBitmap.height,
-                            matrix,
-                            true
-                        )
+//                        val bitmapFile = BitmapFactory.decodeFile(imgFile.getAbsolutePath())
+//                        val matrix = Matrix()
+//                        matrix.postRotate(90f)
+//                        val previewBitmap =
+//                            Bitmap.createScaledBitmap(bitmapFile, bitmapFile.height, bitmapFile.width, true)
+//                        val scaledBitmap = Bitmap.createScaledBitmap(bitmapFile, height!!, width!!, true)
+//                        val rotatedScaledBitmap = Bitmap.createBitmap(
+//                            scaledBitmap,
+//                            0,
+//                            0,
+//                            scaledBitmap.width,
+//                            scaledBitmap.height,
+//                            matrix,
+//                            true
+//                        )
+//                        val rotatedBitmap = Bitmap.createBitmap(
+//                            previewBitmap,
+//                            0,
+//                            0,
+//                            previewBitmap.width,
+//                            previewBitmap.height,
+//                            matrix,
+//                            true
+//                        )
+                        Toast.makeText(context, "Capture Success", Toast.LENGTH_LONG).show()
 
                     }
+                    saveData(mData,info)
+                    isSuspected = false
                     camera_btn.visibility = View.GONE
-                    Toast.makeText(context, "Capture Success", Toast.LENGTH_LONG).show()
+                    cancel_btn.visibility = View.GONE
+                }
+                else if(resultCode == Activity.RESULT_CANCELED){
+                    saveData(mData,"")
+                    isSuspected = false
+                    camera_btn.visibility = View.GONE
+                    cancel_btn.visibility = View.GONE
+                    Toast.makeText(context, "Capture Failed", Toast.LENGTH_LONG).show()
                 }
             }
         }
+    }
+
+    fun popFragments() {
+        fragmentManager!!.popBackStack(fragmentManager!!.getBackStackEntryAt(fragmentManager!!.getBackStackEntryCount()-2).getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
 

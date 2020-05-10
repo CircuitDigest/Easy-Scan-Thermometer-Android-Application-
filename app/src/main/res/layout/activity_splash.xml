@@ -4,13 +4,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/splash_bg"
+        android:background="#ffffff"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:text="@string/app_name"
+            android:src="@drawable/splash_screen"
             android:textColor="#ffffff"
             android:textSize="30sp"
             android:textStyle="bold"
@@ -18,6 +19,28 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/cl_logo"
+            android:text="by"
+            android:textStyle="italic"
+            android:textColor="#A19E9E"/>
+
+        <ImageView
+            android:layout_width="150dp"
+            android:id="@+id/cl_logo"
+            android:layout_height="100dp"
+            android:text="@string/app_name"
+            android:src="@drawable/icn_horizontal"
+            android:textColor="#ffffff"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

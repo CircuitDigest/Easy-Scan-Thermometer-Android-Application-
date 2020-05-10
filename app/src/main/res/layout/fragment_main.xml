@@ -13,10 +13,11 @@
         android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Please connect the device"
+        android:text="Please connect to CL-90615"
         android:textStyle="bold"
         app:layout_constraintVertical_chainStyle="packed"
         android:layout_marginTop="60dp"
+        android:textColor="#878383"
         android:fontFamily="sans-serif-condensed-medium"
         app:layout_constraintEnd_toEndOf="parent"
         android:textSize="20sp"
@@ -35,6 +36,7 @@
         app:layout_constraintBottom_toTopOf="@id/message"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
