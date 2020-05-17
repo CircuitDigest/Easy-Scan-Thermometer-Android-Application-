@@ -10,7 +10,9 @@ import io.reactivex.schedulers.Schedulers
 class MainViewModel(var movieTableDao: DetailsTableDao) : ViewModel() {
 
     var detailsList: MutableLiveData<List<DetailsTable>> = MutableLiveData()
+    var suspectedListPresent: MutableLiveData<Int> = MutableLiveData()
     var suspectedList: MutableLiveData<List<DetailsTable>> = MutableLiveData()
+    var filterList: MutableLiveData<List<DetailsTable>> = MutableLiveData()
     var detailsListPresent: MutableLiveData<Int> = MutableLiveData()
     var isAdded: MutableLiveData<Int> = MutableLiveData()
     var isCleared: MutableLiveData<Int> = MutableLiveData()
@@ -33,6 +35,21 @@ class MainViewModel(var movieTableDao: DetailsTableDao) : ViewModel() {
             .subscribe {
                 if (it != null && it?.size > 0) {
                     suspectedList.postValue(it)
+                } else {
+                    suspectedListPresent.postValue(-1)
+                }
+            }
+    }
+
+    fun getFilterListByDate(date : String) {
+        movieTableDao.getFilterListByDate(date).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                if (it != null && it?.size > 0) {
+                    for(temp in it){
+                        temp.isFilterList = true
+                    }
+                    filterList.postValue(it)
                 } else {
                     detailsListPresent.postValue(-1)
                 }

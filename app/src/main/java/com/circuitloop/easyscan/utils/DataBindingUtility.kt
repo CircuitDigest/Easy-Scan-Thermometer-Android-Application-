@@ -39,15 +39,19 @@ object DataBindingUtility {
     @BindingAdapter("app:list", "app:pos")
     fun setDateText(textView: TextView?, list: List<DetailsTable>?,pos:Int?) {
         pos?.let{
-            textView?.text = "Date : " + list?.get(pos)?.lastDate
-            if(it > 0){
-                if(list?.get(pos-1)?.lastDate == list?.get(pos)?.lastDate){
-                    textView?.visibility = View.GONE
-                }else{
+            textView?.text = list?.get(pos)?.lastDate
+            if(list!![it].isFilterList){
+                textView?.visibility = View.GONE
+            }else {
+                if (it > 0) {
+                    if (list?.get(pos - 1)?.lastDate == list?.get(pos)?.lastDate) {
+                        textView?.visibility = View.GONE
+                    } else {
+                        textView?.visibility = View.VISIBLE
+                    }
+                } else {
                     textView?.visibility = View.VISIBLE
                 }
-            }else{
-                textView?.visibility = View.VISIBLE
             }
         }
     }

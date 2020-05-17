@@ -69,8 +69,8 @@ class SerialService : Service(),
     fun attach(listener: SerialListener) {
         require(!(Looper.getMainLooper().thread !== Thread.currentThread())) { "not in main thread" }
         cancelNotification()
-        // use synchronized() to prevent new items in queue2
-// new items will not be added to queue1 because mainLooper.post and attach() run in main thread
+        // use synchronized() to prevent level_n items in queue2
+// level_n items will not be added to queue1 because mainLooper.post and attach() run in main thread
         if (connected) {
             synchronized(this) { this.listener = listener }
         }

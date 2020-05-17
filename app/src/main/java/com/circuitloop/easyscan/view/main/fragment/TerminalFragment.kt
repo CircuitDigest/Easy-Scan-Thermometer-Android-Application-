@@ -3,9 +3,6 @@ package com.circuitloop.easyscan.view.main.fragment
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.*
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.media.MediaPlayer
@@ -16,6 +13,7 @@ import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +31,6 @@ import com.circuitloop.easyscan.database.DetailsTable
 import com.circuitloop.easyscan.services.SerialService
 import com.circuitloop.easyscan.utils.Constants
 import com.circuitloop.easyscan.utils.Constants.CAMERA_INTENT
-import com.circuitloop.easyscan.utils.Constants.INTENT_KEY_HOMEBASEMODEL
 import com.circuitloop.easyscan.utils.Constants.INTENT_KEY_VIEWFINDERHEIGHT
 import com.circuitloop.easyscan.utils.Constants.INTENT_KEY_VIEWFINDERWIDTH
 import com.circuitloop.easyscan.utils.Constants.RESULT_INTENT
@@ -60,6 +57,8 @@ class TerminalFragment : Fragment(),
         False, Pending, True
     }
 
+    private var temperatureValue: Float = 0f
+    private var lastTime: Long = 0
     private var isSoundEnabled: Boolean = true
 
     private var mData: String = ""
@@ -96,59 +95,78 @@ class TerminalFragment : Fragment(),
     }
 
     override fun onDestroy() {
-        if (connected != Connected.False) disconnect()
-        activity!!.stopService(Intent(activity, SerialService::class.java))
+//        if (connected != Connected.False) disconnect()
+//        activity!!.stopService(Intent(activity, SerialService::class.java))
         super.onDestroy()
     }
 
     override fun onStart() {
         super.onStart()
-        if (service != null) service!!.attach(this) else activity!!.startService(
-            Intent(
-                activity,
-                SerialService::class.java
-            )
-        ) // prevents service destroy on unbind from recreated activity caused by orientation change
+//        if (service != null) service!!.attach(this) else activity!!.startService(
+//            Intent(
+//                activity,
+//                SerialService::class.java
+//            )
+//        ) // prevents service destroy on unbind from recreated activity caused by orientation change
     }
 
     override fun onStop() {
-        if (service != null && !activity!!.isChangingConfigurations) service!!.detach()
+//        if (service != null && !activity!!.isChangingConfigurations) service!!.detach()
         super.onStop()
     }
 
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
-        getActivity()!!.bindService(
-            Intent(getActivity(), SerialService::class.java),
-            this,
-            Context.BIND_AUTO_CREATE
-        )
+//        getActivity()!!.bindService(
+//            Intent(getActivity(), SerialService::class.java),
+//            this,
+//            Context.BIND_AUTO_CREATE
+//        )
     }
 
     override fun onDetach() {
-        try {
-            activity!!.unbindService(this)
-        } catch (ignored: Exception) {
-        }
+//        try {
+//            activity!!.unbindService(this)
+//        } catch (ignored: Exception) {
+//        }
         super.onDetach()
     }
 
     override fun onResume() {
         super.onResume()
+        getActivity()!!.bindService(
+            Intent(getActivity(), SerialService::class.java),
+            this,
+            Context.BIND_AUTO_CREATE
+        )
+        if (service != null) service!!.attach(this) else activity!!.startService(
+            Intent(
+                activity,
+                SerialService::class.java
+            )
+        )
         activity!!.registerReceiver(
             broadcastReceiver,
             IntentFilter(Constants.INTENT_ACTION_GRANT_USB)
         )
-        if (initialStart && service != null) {
-            initialStart = false
+        if ( service != null) {
             activity!!.runOnUiThread { connect() }
         }
         if (controlLines != null && connected == Connected.True) controlLines!!.start()
+        mDataCounter = 0
+        isSuspected = false
     }
 
     override fun onPause() {
         activity!!.unregisterReceiver(broadcastReceiver)
         if (controlLines != null) controlLines!!.stop()
+        if (service != null && !activity!!.isChangingConfigurations) service!!.detach()
+        if (connected != Connected.False) disconnect()
+        activity!!.stopService(Intent(activity, SerialService::class.java))
+        try {
+            activity!!.unbindService(this)
+        } catch (ignored: Exception) {
+        }
         super.onPause()
     }
 
@@ -191,8 +209,17 @@ class TerminalFragment : Fragment(),
 
         mViewModel.detailsListPresent.observe(viewLifecycleOwner, Observer {
             if (it==-1) {
-                suspected_count.text = "0"
+                Toast.makeText(context, "Received All Data", Toast.LENGTH_LONG).show()
+                Log.e("Valli ","------------------------------------------------------->>>>>>>>>>>>>>>>")
                 total_count.text = "0"
+            }
+        })
+
+        mViewModel.suspectedListPresent.observe(viewLifecycleOwner, Observer {
+            if (it==-1) {
+                Toast.makeText(context, "Received Suspected Data", Toast.LENGTH_LONG).show()
+                Log.e("Valli ","------------------------------------------------------->>>>>>>>>>>>>>>>")
+                suspected_count.text = "0"
             }
         })
 
@@ -304,6 +331,7 @@ class TerminalFragment : Fragment(),
             .into(imgview_forehead)
         showForeheadImg(true)
         isSoundEnabled = checkSettings()
+        temperatureValue = checkStorageTempValue()
         camera_btn.visibility = View.GONE
         cancel_btn.visibility = View.GONE
         total_lyt?.setOnClickListener{
@@ -330,6 +358,11 @@ class TerminalFragment : Fragment(),
         }
     }
 
+    private fun checkStorageTempValue(): Float {
+        SharedPreferencesHolder.initializeSharedPrefs(context!!)
+        return SharedPreferencesHolder.appSharedPreferences.getFloat(Constants.SHARED_PREF_KEY_TEMP, 38f)
+    }
+
     private fun logAnalyticsEvent(total: String, suspected: String) {
         val bundle = Bundle()
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, total)
@@ -350,27 +383,32 @@ class TerminalFragment : Fragment(),
 
 
     private fun receive(data: ByteArray) {
-            if(String(data).trim().equals("position_error") && !isSuspected ){
+        Log.e("Valli Log",String(data).trim())
+            if(String(data).trim().equals("position_error") && !isSuspected && (System.currentTimeMillis()-lastTime > 1000)){
                     showForeheadImg(true)
                     camera_btn?.visibility = View.GONE
                     cancel_btn?.visibility = View.GONE
                     temp_bg?.setBackgroundResource(R.drawable.temperature_bg)
                     mDataCounter = 0
 
+            }else if(String(data).trim().contains("start") && !isSuspected && (System.currentTimeMillis()-lastTime > 1000)){
+                Log.e("Valliyappan","Start received")
+                playSound(null)
             }else{
+//                if(mDataCounter == 0) playSound(null)
                 if(mDataCounter < 3) {
                     mDataCounter += 1
                     var tempValue = 0f
                     try {
                         tempValue = String(data).toFloat()
-                        receive_text.text = String(data).trim()
+                        receive_text.text = String(data).trim() + "°"
                         showForeheadImg(false)
                         if (mDataCounter > 2) {
                             mData = String(data)
                             isSuspected = checkTempForCamera(tempValue)
                             if(!isSuspected)saveData(String(data), "")
                             playSound(isSuspected)
-                            Thread.sleep(1500);
+                            lastTime = System.currentTimeMillis()
                         }
                     } catch (e: java.lang.Exception) {
 
@@ -391,16 +429,38 @@ class TerminalFragment : Fragment(),
         val time: String = simpleDateFormat.format(Calendar.getInstance().getTime())
         tableItem.time = time
 
-        val pattern1 = "dd/MM/yy"
+        val pattern1 = "EEE, LLL dd"
         val simpleDateFormat1 = SimpleDateFormat(pattern1)
         val time1: String = simpleDateFormat1.format(Calendar.getInstance().getTime())
         tableItem.lastDate = time1
         tableItem.imgPath = info
+        tableItem.serialNo = calculateSerialNo(time1).toString()
+        savePrefData(time1,tableItem.serialNo.toInt())
         mViewModel.saveToBookmark(tableItem)
     }
 
+    private fun calculateSerialNo(
+        time: String) : Int {
+        context?.let{
+            SharedPreferencesHolder.initializeFilterSharedPrefs(it)
+            return (SharedPreferencesHolder.filterSharedPreferences.getInt(time, 0) + 1)
+        }
+        return 0
+    }
+
+    private fun savePrefData(date: String,temp : Int) {
+        context?.let {
+            SharedPreferencesHolder.initializeFilterSharedPrefs(it)
+            with(SharedPreferencesHolder.filterSharedPreferences.edit()) {
+                putInt(date, temp)
+                apply()
+                commit()
+            }
+        }
+    }
+
     private fun checkTempForCamera(tempValue: Float): Boolean {
-        if(tempValue > 38f){
+        if(tempValue > temperatureValue){
             temp_bg?.setBackgroundResource(R.drawable.temp_red_bg)
             camera_btn.visibility = View.VISIBLE
             cancel_btn.visibility = View.VISIBLE
@@ -424,12 +484,18 @@ class TerminalFragment : Fragment(),
         val intent = Intent(context, CameraActivity::class.java)
         startActivityForResult(intent, CAMERA_INTENT)
     }
+    var mp1 : MediaPlayer? = null
 
     private fun playSound(suspected: Boolean?) {
-        var mp1 : MediaPlayer? = null
+        if(mp1 != null && mp1!!.isPlaying) {
+            mp1?.pause()
+            mp1?.reset()
+            mp1?.release()
+            mp1 = null
+        }
         suspected?.let {
             if(suspected) mp1 = MediaPlayer.create(context, R.raw.suspected)
-            else mp1 = MediaPlayer.create(context, R.raw.normal)
+            else mp1 = MediaPlayer.create(context, R.raw.level_n)
         }
         if(suspected==null) mp1 = MediaPlayer.create(context, R.raw.scan)
         mp1?.setOnCompletionListener(object : MediaPlayer.OnCompletionListener {
@@ -439,7 +505,7 @@ class TerminalFragment : Fragment(),
                 mp?.release()
                 mp1 = null
             }
-        });
+        })
         if(isSoundEnabled) mp1?.start()
     }
 
@@ -556,7 +622,7 @@ class TerminalFragment : Fragment(),
         init {
             mainLooper = Handler(Looper.getMainLooper())
             runnable =
-                Runnable { start() } // w/o explicit Runnable, a new lambda would be created on each postDelayed, which would not be found again by removeCallbacks
+                Runnable { start() } // w/o explicit Runnable, a level_n lambda would be created on each postDelayed, which would not be found again by removeCallbacks
             rtsBtn = view.findViewById(R.id.controlLineRts)
             ctsBtn = view.findViewById(R.id.controlLineCts)
             dtrBtn = view.findViewById(R.id.controlLineDtr)

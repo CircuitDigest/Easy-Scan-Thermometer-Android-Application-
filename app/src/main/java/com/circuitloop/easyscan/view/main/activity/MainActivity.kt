@@ -2,40 +2,32 @@ package com.circuitloop.easyscan.view.main.activity
 
 import android.app.Activity
 import android.app.Dialog
-import android.app.PendingIntent.getActivity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.Matrix
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.ObservableField
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.*
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.Observer
 import com.circuitloop.easyscan.R
 import com.circuitloop.easyscan.app.MainApplication
 import com.circuitloop.easyscan.database.DetailsTable
-import com.circuitloop.easyscan.utils.Constants
-import com.circuitloop.easyscan.utils.WriteExcel
-import com.circuitloop.easyscan.view.main.fragment.*
+import com.circuitloop.easyscan.utils.SharedPreferencesHolder
+import com.circuitloop.easyscan.view.main.fragment.HomeFragment
+import com.circuitloop.easyscan.view.main.fragment.SettingsFragment
+import com.circuitloop.easyscan.view.main.fragment.TerminalFragment
 import com.circuitloop.easyscan.viewmodel.main.MainViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.custom_dialog_touch_id_input.*
-import kotlinx.android.synthetic.main.fragment_terminal.*
 import org.koin.android.viewmodel.ext.android.viewModel
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -71,8 +63,9 @@ class MainActivity : AppCompatActivity(),LifecycleObserver {
 
         }
         logo.setOnClickListener {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             for (fragment in supportFragmentManager.fragments) {
-                supportFragmentManager.popBackStackImmediate()
+                supportFragmentManager.fragments.remove(fragment)
             }
 
             supportFragmentManager.beginTransaction()
@@ -80,8 +73,9 @@ class MainActivity : AppCompatActivity(),LifecycleObserver {
                 .commitNow()
         }
         logo_txt.setOnClickListener {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             for (fragment in supportFragmentManager.fragments) {
-                supportFragmentManager.popBackStackImmediate()
+                supportFragmentManager.fragments.remove(fragment)
             }
 
             supportFragmentManager.beginTransaction()
@@ -112,213 +106,233 @@ class MainActivity : AppCompatActivity(),LifecycleObserver {
         val time: String = simpleDateFormat.format(Calendar.getInstance().getTime())
         tableItem.time = time
 
-        val pattern1 = "dd/MM/yy"
+        val pattern1 = "EEE, LLL dd"
         val simpleDateFormat1 = SimpleDateFormat(pattern1)
         val time1: String = simpleDateFormat1.format(Calendar.getInstance().getTime())
         tableItem.lastDate = time1
         tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
-        mViewModel.saveToBookmark(tableItem)
-        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
-        mViewModel.saveToBookmark(tableItem)
+        tableItem.serialNo = calculateSerialNo(time1).toString()
+        savePrefData(time1,tableItem.serialNo.toInt())
+        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112898103.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112940454.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112961754.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112977314.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589112997130.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113014869.jpg"
+//        mViewModel.saveToBookmark(tableItem)
+//        tableItem.imgPath = "/storage/emulated/0/EasyScan/1589113032564.jpg"
+//        mViewModel.saveToBookmark(tableItem)
     }
+
+    private fun calculateSerialNo(
+        time: String) : Int {
+        SharedPreferencesHolder.initializeFilterSharedPrefs(this)
+        return (SharedPreferencesHolder.filterSharedPreferences.getInt(time, 0) + 1)
+    }
+
+    private fun savePrefData(date: String,temp : Int) {
+        SharedPreferencesHolder.initializeFilterSharedPrefs(this)
+        with (SharedPreferencesHolder.filterSharedPreferences.edit()) {
+            putInt(date, temp)
+            apply()
+            commit()
+        }
+    }
+
 
     private fun showDialog() {
                 val dialog = Dialog(this)
                 dialog.setContentView(R.layout.custom_dialog_touch_id_input)
                 dialog.txt_positive_btn.setOnClickListener {
                     mViewModel.clearDB()
+                    SharedPreferencesHolder.initializeFilterSharedPrefs(this)
+                    SharedPreferencesHolder.deleteFilterSharedPrefData()
                     mViewModel.getBookmarkList()
                     dialog.dismiss()
                 }
@@ -350,15 +364,29 @@ class MainActivity : AppCompatActivity(),LifecycleObserver {
         if (getVisibleFragment() is TerminalFragment){
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             for (fragment in supportFragmentManager.fragments) {
-                supportFragmentManager.popBackStackImmediate()
+                supportFragmentManager.fragments.remove(fragment)
             }
 
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment, HomeFragment.newInstance())
                 .commitNow()
+        }else if (getVisibleFragment() is HomeFragment){
+            finish()
         }else super.onBackPressed()
     }
 
+
+    fun hideKeyboard(activity: Activity) {
+        val imm: InputMethodManager =
+            activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        //Find the currently focused view, so we can grab the correct window token from it.
+        var view = activity.currentFocus
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = View(activity)
+        }
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
     private fun getVisibleFragment(): Fragment? {
         val fragmentManager: FragmentManager = this@MainActivity.supportFragmentManager
         val fragments: List<Fragment> = fragmentManager.getFragments()

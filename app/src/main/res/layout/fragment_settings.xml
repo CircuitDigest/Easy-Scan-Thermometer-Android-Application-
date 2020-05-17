@@ -32,8 +32,8 @@
             android:layout_height="wrap_content"/>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:text="Vibration"
+            android:layout_width="0dp"
+            android:text="Temperature Value"
             android:textStyle="bold"
             android:fontFamily="sans-serif-condensed"
             android:id="@+id/vibration_txt"
@@ -48,7 +48,7 @@
             android:layout_marginLeft="40dp"
             android:layout_marginBottom="30dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/switch2"
+            app:layout_constraintRight_toLeftOf="@id/edit_txt"
             app:layout_constraintTop_toBottomOf="@id/sound_txt"
             android:layout_height="wrap_content"/>
 
@@ -64,11 +64,22 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/sound_txt" />
 
-        <Switch
-            android:id="@+id/switch2"
+        <EditText
+            android:id="@+id/edit_txt"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:trackTint="@color/colorPrimary"
+            android:singleLine="true"
+            android:layout_height="50dp"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:textColor="#79c9bc"
+            android:paddingLeft="10dp"
+            tools:text="38.0"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:inputType="numberDecimal"
+            android:fontFamily="sans-serif-condensed"
+            android:background="#ffffff"
             app:layout_constraintLeft_toRightOf="@id/vibration_txt"
             android:layout_marginRight="30dp"
             app:layout_constraintTop_toTopOf="@id/vibration_txt"

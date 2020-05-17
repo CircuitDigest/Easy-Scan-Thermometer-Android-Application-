@@ -19,6 +19,9 @@ interface DetailsTableDao {
     @Query("Select * From DetailsTable where isSuspected = :bool")
     fun getSuspectedList(bool: Boolean = true): Observable<List<DetailsTable>>
 
+    @Query("Select * From DetailsTable where lastDate = :date")
+    fun getFilterListByDate(date: String): Observable<List<DetailsTable>>
+
     @Query("Select * From DetailsTable where serialNo = :id")
     fun getSerialValue(id: String): DetailsTable
 

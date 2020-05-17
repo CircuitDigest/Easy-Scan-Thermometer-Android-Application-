@@ -14,7 +14,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -45,8 +44,10 @@ private const val REQUEST_CODE_PERMISSIONS = 199
 private const val REQUEST_CODE_SHARE_PERMISSIONS = 200
 private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-class DetailsFragment : Fragment(),ApplicationHandler {
+class DetailsFragment : Fragment(),ApplicationHandler, AdapterView.OnItemSelectedListener {
 
+    private var isFiltered: Boolean = false
+    private var filterList = listOf<DetailsTable>()
     private var isSuspected: Boolean = false
     lateinit var fragmentDetailsBinding: FragmentDetailsBinding
     var baseRecyclerAdapter: BaseRecyclerAdapter? = null
@@ -91,12 +92,25 @@ class DetailsFragment : Fragment(),ApplicationHandler {
         }
         mViewModel.detailsListPresent.observe(viewLifecycleOwner, Observer {
             fragmentDetailsBinding.progress.visibility = View.GONE
+            fragmentDetailsBinding.dateSpinner.visibility = View.GONE
             fragmentDetailsBinding.noItems.visibility = View.VISIBLE
             fragmentDetailsBinding.txtTitle.visibility = View.GONE
             fragmentDetailsBinding.recyclerView.visibility = View.GONE
+            fragmentDetailsBinding.dateSpinner.visibility = View.GONE
             fragmentDetailsBinding.floatingActionButton.hide()
         })
 
+        if(isSuspected){
+            mViewModel.suspectedListPresent.observe(viewLifecycleOwner, Observer {
+                fragmentDetailsBinding.progress.visibility = View.GONE
+                fragmentDetailsBinding.dateSpinner.visibility = View.GONE
+                fragmentDetailsBinding.noItems.visibility = View.VISIBLE
+                fragmentDetailsBinding.txtTitle.visibility = View.GONE
+                fragmentDetailsBinding.recyclerView.visibility = View.GONE
+                fragmentDetailsBinding.dateSpinner.visibility = View.GONE
+                fragmentDetailsBinding.floatingActionButton.hide()
+            })
+        }
         return fragmentDetailsBinding.root
     }
 
@@ -112,7 +126,6 @@ class DetailsFragment : Fragment(),ApplicationHandler {
         fragmentDetailsBinding.recyclerView.adapter = baseRecyclerAdapter
         fragmentDetailsBinding.progress.visibility = View.VISIBLE
         fragmentDetailsBinding.noItems.visibility = View.GONE
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -134,6 +147,7 @@ class DetailsFragment : Fragment(),ApplicationHandler {
         }else{
             mViewModel.detailsList.observe(viewLifecycleOwner , Observer {
                 callFilterCalculation(it)
+                fragmentDetailsBinding.dateSpinner.visibility = View.VISIBLE
                 fragmentDetailsBinding.progress.visibility = View.GONE
                 fragmentDetailsBinding.noItems.visibility = View.GONE
                 baseRecyclerAdapter?.updateList(it)
@@ -144,12 +158,18 @@ class DetailsFragment : Fragment(),ApplicationHandler {
             })
         }
 
+        mViewModel.filterList.observe(viewLifecycleOwner , Observer {
+            baseRecyclerAdapter?.updateList(it)
+            filterList = it
+        })
+
 
     }
 
     private fun callSuspectedInit() {
         mViewModel.suspectedList.observe(viewLifecycleOwner , Observer {
             callFilterCalculation(it)
+            fragmentDetailsBinding.dateSpinner.visibility = View.VISIBLE
             fragmentDetailsBinding.progress.visibility = View.GONE
             fragmentDetailsBinding.noItems.visibility = View.GONE
             baseRecyclerAdapter?.updateList(it)
@@ -174,6 +194,16 @@ class DetailsFragment : Fragment(),ApplicationHandler {
                 }
             }
         }
+
+        context?.let {
+            var list = ArrayList<String>()
+            list.add("All")
+            list.addAll(getList(context!!,true))
+            val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(context!!, R.layout.simple_spinner_item, list)
+            dataAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
+            fragmentDetailsBinding.dateSpinner.setAdapter(dataAdapter)
+            fragmentDetailsBinding.dateSpinner.setOnItemSelectedListener(this)
+        }
     }
 
     private fun saveValue(context: Context, text : String, pos: Int?) {
@@ -181,6 +211,7 @@ class DetailsFragment : Fragment(),ApplicationHandler {
             var list = getList(context, true)
             var intList = getList(context, false)
             if(pos == 0){
+                list.add("All")
                 list.clear()
                 intList.clear()
             }
@@ -209,10 +240,18 @@ class DetailsFragment : Fragment(),ApplicationHandler {
         if (allPermissionsGranted()) {
             fragmentDetailsBinding.progress.visibility = View.VISIBLE
             fragmentDetailsBinding.blurView.visibility = View.VISIBLE
-            Single.fromCallable<ObservableField<String>> { WriteExcel.main(list, isSuspected) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { resultObject -> handleDBSucess(resultObject) }
+            if(isFiltered){
+                Single.fromCallable<ObservableField<String>> { WriteExcel.main(filterList, isSuspected) }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { resultObject -> handleDBSucess(resultObject) }
+            }else{
+                Single.fromCallable<ObservableField<String>> { WriteExcel.main(list, isSuspected) }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { resultObject -> handleDBSucess(resultObject) }
+            }
+
         }else{
                 requestPermissions( //Method of Fragment
                     REQUIRED_PERMISSIONS,
@@ -295,6 +334,29 @@ class DetailsFragment : Fragment(),ApplicationHandler {
         }
     }
 
+    override fun onItemSelected(
+        parent: AdapterView<*>,
+        view: View?,
+        position: Int,
+        id: Long
+    ) { // On selecting a spinner item
+        val item = parent.getItemAtPosition(position).toString()
+        if(item.trim().equals("All")){
+            filterList = emptyList()
+            isFiltered = false
+            baseRecyclerAdapter?.updateList(list)
+        }else{
+            isFiltered = true
+            mViewModel.getFilterListByDate(item.trim())
+        }
+        // Showing selected spinner item
+        //Toast.makeText(parent.context, "Selected: $item", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onNothingSelected(arg0: AdapterView<*>?) {
+
+    }
+
     private fun setDialogAdapter(dialog: Dialog) {
         var list = getList(context!!,true)
 //        list.add("10/05/20")
@@ -329,17 +391,11 @@ class DetailsFragment : Fragment(),ApplicationHandler {
         }
 
 
-        dialog.listView.setOnItemClickListener(object : AdapterView.OnItemClickListener {
-            override fun onItemClick(
-                adapterView: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                l: Long
-            ) { // TODO Auto-generated method stub
-                val value: String? = adapter.getItem(position)
-                Toast.makeText(context, value, Toast.LENGTH_SHORT).show()
-            }
-        })
+        dialog.listView.setOnItemClickListener { adapterView, view, position, l ->
+            // TODO Auto-generated method stub
+            val value: String? = adapter.getItem(position)
+            Toast.makeText(context, value, Toast.LENGTH_SHORT).show()
+        }
     }
 
 

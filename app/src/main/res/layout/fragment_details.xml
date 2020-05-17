@@ -23,6 +23,18 @@
             android:textSize="20sp"
             android:layout_height="wrap_content"/>
 
+        <Spinner
+            android:id="@+id/date_spinner"
+            android:layout_width="wrap_content"
+            android:layout_margin="10dp"
+            android:spinnerMode="dropdown"
+            android:visibility="gone"
+            android:gravity="end"
+            android:backgroundTint="#878383"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_height="wrap_content" />
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
