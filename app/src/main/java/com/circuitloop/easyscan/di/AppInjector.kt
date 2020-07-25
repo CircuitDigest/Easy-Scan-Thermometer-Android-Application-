@@ -5,7 +5,7 @@ import com.assignment.app.AppNavigator
 import com.circuitloop.easyscan.database.DetailsDatabase
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
-val DATABASE_NAME = "easyscan_db"
+val DATABASE_NAME = "easyscan_database"
 
 
 val appNavigatorModule = module { single { AppNavigator() } }

@@ -18,6 +18,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.CompoundButton
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
@@ -44,6 +45,7 @@ import com.circuitloop.easyscan.viewmodel.main.MainViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
+import kotlinx.android.synthetic.main.fragment_settings.*
 import kotlinx.android.synthetic.main.fragment_terminal.*
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.io.File
@@ -57,6 +59,7 @@ class TerminalFragment : Fragment(),
         False, Pending, True
     }
 
+    private var isContinousMode: Boolean = false
     private var temperatureValue: Float = 0f
     private var lastTime: Long = 0
     private var isSoundEnabled: Boolean = true
@@ -209,7 +212,6 @@ class TerminalFragment : Fragment(),
 
         mViewModel.detailsListPresent.observe(viewLifecycleOwner, Observer {
             if (it==-1) {
-                Toast.makeText(context, "Received All Data", Toast.LENGTH_LONG).show()
                 Log.e("Valli ","------------------------------------------------------->>>>>>>>>>>>>>>>")
                 total_count.text = "0"
             }
@@ -217,7 +219,6 @@ class TerminalFragment : Fragment(),
 
         mViewModel.suspectedListPresent.observe(viewLifecycleOwner, Observer {
             if (it==-1) {
-                Toast.makeText(context, "Received Suspected Data", Toast.LENGTH_LONG).show()
                 Log.e("Valli ","------------------------------------------------------->>>>>>>>>>>>>>>>")
                 suspected_count.text = "0"
             }
@@ -356,6 +357,9 @@ class TerminalFragment : Fragment(),
         reset_txt?.setOnClickListener {
             mViewModel.clearDB()
         }
+        continuous_switch.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            isContinousMode = isChecked
+        })
     }
 
     private fun checkStorageTempValue(): Float {
@@ -384,12 +388,34 @@ class TerminalFragment : Fragment(),
 
     private fun receive(data: ByteArray) {
         Log.e("Valli Log",String(data).trim())
+        if(isContinousMode){
+            camera_btn?.visibility = View.GONE
+            cancel_btn?.visibility = View.GONE
+            showForeheadImg(false)
+            if(String(data).trim().equals("position_error")){
+                receive_text.text = "0.0°"
+                temp_bg?.setBackgroundResource(R.drawable.temperature_bg)
+            }else{
+                var tempValue = 0f
+                try {
+                    tempValue = String(data).toFloat()
+                    receive_text.text = String(data).trim() + "°"
+                    mData = String(data)
+                    checkTempForCamera(tempValue)
+//                    playSound(isSuspected)
+                    lastTime = System.currentTimeMillis()
+                } catch (e: java.lang.Exception) {
+
+                }
+
+            }
+        }else{
             if(String(data).trim().equals("position_error") && !isSuspected && (System.currentTimeMillis()-lastTime > 1000)){
-                    showForeheadImg(true)
-                    camera_btn?.visibility = View.GONE
-                    cancel_btn?.visibility = View.GONE
-                    temp_bg?.setBackgroundResource(R.drawable.temperature_bg)
-                    mDataCounter = 0
+                showForeheadImg(true)
+                camera_btn?.visibility = View.GONE
+                cancel_btn?.visibility = View.GONE
+                temp_bg?.setBackgroundResource(R.drawable.temperature_bg)
+                mDataCounter = 0
 
             }else if(String(data).trim().contains("start") && !isSuspected && (System.currentTimeMillis()-lastTime > 1000)){
                 Log.e("Valliyappan","Start received")
@@ -415,6 +441,8 @@ class TerminalFragment : Fragment(),
                     }
                 }
             }
+        }
+
 
     }
 
@@ -462,14 +490,16 @@ class TerminalFragment : Fragment(),
     private fun checkTempForCamera(tempValue: Float): Boolean {
         if(tempValue > temperatureValue){
             temp_bg?.setBackgroundResource(R.drawable.temp_red_bg)
-            camera_btn.visibility = View.VISIBLE
-            cancel_btn.visibility = View.VISIBLE
-            camera_btn.setOnClickListener {
-                launchCamera()
-            }
-            cancel_btn.setOnClickListener {
-                saveData(mData,"")
-                isSuspected = false
+            if(!isContinousMode){
+                camera_btn.visibility = View.VISIBLE
+                cancel_btn.visibility = View.VISIBLE
+                camera_btn.setOnClickListener {
+                    launchCamera()
+                }
+                cancel_btn.setOnClickListener {
+                    saveData(mData,"")
+                    isSuspected = false
+                }
             }
             return true
         }else{

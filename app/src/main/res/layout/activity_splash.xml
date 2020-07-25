@@ -34,7 +34,7 @@
             android:id="@+id/cl_logo"
             android:layout_height="100dp"
             android:text="@string/app_name"
-            android:src="@drawable/icn_tayaltech"
+            android:src="@drawable/ic_circuit_digest"
             android:textColor="#ffffff"
             android:textSize="30sp"
             android:textStyle="bold"

@@ -11,9 +11,11 @@
 
     <TextView
         android:id="@+id/message"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
         android:layout_height="wrap_content"
-        android:text="Please enable OTG and connect to CL-90615"
+        android:text="Please enable OTG and connect to TEMPKHOJ"
         android:textStyle="bold"
         app:layout_constraintVertical_chainStyle="packed"
         android:layout_marginTop="60dp"
