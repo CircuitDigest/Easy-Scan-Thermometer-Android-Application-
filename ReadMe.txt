@@ -1,5 +1,3 @@
-<img src="https://circuitdigest.com/sites/default/files/projectimage_mic/Contactless-Smart-Thermometer.jpg">
-
 
 Project Link: https://circuitdigest.com/microcontroller-projects/contactless-smart-thermometer-using-mlx90615-ir-temperature-sensor-arduino-and-android
 
